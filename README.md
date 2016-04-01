@@ -81,10 +81,10 @@ Caution
 *Do not apply this procedure to your production project.* 
 
 Currently, the skipdata test called "Arm - Skip data with callback" causes a bug
-check. While a reason is unknown and being investigated, it seems to be buffer
-overflow or memory corruption. While I have not seen any issues by using x86 
-related features from a driver, this procedure should not be applied until a
-cause and a scope of this issue are identified. 
+check on 32bit systems. While a reason is unknown and being investigated, it 
+seems to be buffer overflow or memory corruption. While I have not seen any 
+issues by using x86_64 related features from a driver, this procedure should not
+be applied until a cause and a scope of this issue are identified. 
 
 
 Supported Platforms
