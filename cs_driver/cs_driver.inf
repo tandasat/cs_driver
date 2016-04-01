@@ -1,0 +1,90 @@
+;
+; cs_driver.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=cs_driver.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+
+[DestinationDirs]
+DefaultDestDir = 12
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+cs_driver.sys  = 1,,
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%cs_driver.DeviceDesc%=cs_driver_Device, Root\cs_driver ; TODO: edit hw-id
+
+[cs_driver_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+cs_driver.sys
+
+;-------------- Service installation
+[cs_driver_Device.NT.Services]
+AddService = cs_driver,%SPSVCINST_ASSOCSERVICE%, cs_driver_Service_Inst
+
+; -------------- cs_driver driver install sections
+[cs_driver_Service_Inst]
+DisplayName    = %cs_driver.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\cs_driver.sys
+
+;
+;--- cs_driver_Device Coinstaller installation ------
+;
+
+[DestinationDirs]
+cs_driver_Device_CoInstaller_CopyFiles = 11
+
+[cs_driver_Device.NT.CoInstallers]
+AddReg=cs_driver_Device_CoInstaller_AddReg
+CopyFiles=cs_driver_Device_CoInstaller_CopyFiles
+
+[cs_driver_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[cs_driver_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[SourceDisksFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+[cs_driver_Device.NT.Wdf]
+KmdfService =  cs_driver, cs_driver_wdfsect
+[cs_driver_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "cs_driver Installation Disk"
+cs_driver.DeviceDesc = "cs_driver Device"
+cs_driver.SVCDESC = "cs_driver Service"
