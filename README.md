@@ -10,7 +10,7 @@ information of Capstone, see its project page.
 
 Sample Output
 ---------------
-![sample](/imgage/sample.png)
+![sample](/image/sample.png)
 
 
 Motivation
@@ -21,13 +21,18 @@ supports usage by OS kernel code. In fact, one of Capstone documents refers to a
 sample project for how to embed Capstone into Windows kernel driver.
 - https://github.com/aquynh/KernelProject
 
-However, this project cannot be compiled with Visual Studio 2015 with described 
-instructions and lacks information about how to actually configure your driver
-project and compile Capstone. Also, the project consists of files (MB) in order
-to demonstrate make use of C++ Standard Template Library and Boost Libraries
-from drivers while those libraries are unnecessary for using Capstone. For those
-reasons, the sample project is not overly helpful, and a simpler project needs 
-to be created.
+However, this project lacks information about how to actually configure your 
+driver project and compile Capstone. Also, it refers to a revision two years ago 
+and cannot be compiled with Visual Studio 2015 with described instructions. Not
+only that, the repository consists of 50000 files (1.3GB) in order to demonstrate
+make use of C++ Standard Template Library and Boost Libraries from drivers while
+those libraries are unnecessary for using Capstone. For those reasons, the sample
+project is not overly helpful, and a simpler project is needed.
+
+cs_driver, on the other hand, explains how to configure yours and Capstone project
+and includes only minimum amout of code with extensive explanation comments. Also,
+cs_driver is able to run all existing Capstone test code so that a developer can
+confirm that Capstone in the kernel mode is properly functioning.
 
 
 How to use Capstone from your WDK project
@@ -70,3 +75,23 @@ How the cloned Capstone was modified for WDK projects
 ------------------------------------------------------
 (TBD)
 
+
+Caution
+--------
+*Do not apply this procedure to your production project.* 
+
+Currently, the skipdata test called "Arm - Skip data with callback" causes a bug
+check. While a reason is unknown and being investigated, it seems to be buffer
+overflow or memory corruption. While I have not seen any issues by using x86 
+related features from a driver, this procedure should not be applied until a
+cause and a scope of this issue are identified. 
+
+
+Supported Platforms
+--------------------
+- x86 and x64 Windows 7, 8.1 and 10
+
+
+License
+--------
+This software is released under the MIT License, see LICENSE.
