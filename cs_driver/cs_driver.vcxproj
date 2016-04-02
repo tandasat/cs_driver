@@ -134,6 +134,9 @@
     <ClCompile Include="cs_driver.c" />
     <ClCompile Include="cs_driver_test.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cs_driver.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
