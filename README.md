@@ -27,7 +27,7 @@ demanded. For those reasons, the sample project is not overly helpful for those
 who want to learn how to use Capstone in Windows drivers.
 
 cs_driver, on the other hand, explains how to configure your and Capstone project
-and includes only minimum amout of code with detailed comments for learning a 
+and includes only minimum amount of code with detailed comments for learning a 
 procedure to apply Capstone to your project quickly. Also, cs_driver is able to
 run all existing Capstone test code so that a developer can confirm that Capstone
 on the kernel mode is properly functioning.
@@ -68,7 +68,7 @@ use of Capstone from a new driver project, follow the below steps.
 After this, you are free to use Capstone API from a driver.
 
 Those steps are just example and not a hard-rule. Developpers are also free to 
-have aseparate solutions for Capstone and your driver as long as the driver can
+have separate solutions for Capstone and your driver as long as the driver can
 link capstone.lib and run equivalent code to what cs_driver.h provides.
 
     
@@ -76,14 +76,14 @@ link capstone.lib and run equivalent code to what cs_driver.h provides.
 As of time cs_driver was created, source code of Capstone needs to be modified 
 in order to compile, link and run all tests as part of a driver successfully.
 This sections explains what changes were made and why as a reference. Beware 
-that you not need apply those changes when Capstone in this repositry is used. 
+that you not need apply those changes when Capstone in this repository is used. 
 
 #### Added CAPSTONE_API to all Capstone APIs
 - https://github.com/tandasat/capstone/commit/760940fdceb50a09f1a8ebee5dc807b6039f144e
 
 This change is to specifie calling convention for Calstone APIs. 
 
-The defaut setting of calling convention is different between the capstone_static
+The default setting of calling convention is different between the capstone_static
 project and a WDK project. capstone_static compiles code with __cdecl calling 
 converntion, while a WDK project compiles code as __stdcall, leading to link 
 errors 
@@ -97,7 +97,7 @@ This change is to avoid making use of snprintf(), which is not available for
 drivers. 
 
 **This change could lead to a runtime issue when user-defined vsnprintf() does
-not return the same value as what genuen vsnprintf() does.** In order to 
+not return the same value as what genuine vsnprintf() does.** In order to 
 assess this impact, a developer is able to use the cs_driver_vsnprintf_test() 
 function to test if their vsnprintf() conforms behaviour of that of the C/C++ 
 standard.
@@ -170,7 +170,7 @@ option as explained in the "/kernel (Create Kernel Mode Binary)" page on MSDN.
 
 
 ## Caution
-**Do not apply this procedure to your production project.* *
+**Do not apply this procedure to your production project.**
 
 Currently, one of the skipdata tests called "Arm - Skip data with callback" 
 causes a bug check on 32bit systems. While a reason is unknown and being 
