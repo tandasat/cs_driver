@@ -40,29 +40,30 @@ later), ntstrsafe.lib to resolve __fltused, and cs_driver.h and some runtime
 initialization and safe guard code explained in cs_driver.c. In order to make 
 use of Capstone from a new driver project, follow the below steps. 
  
-- Add a new project "Kernel Mode Driver, Empty (KMDF)" to the cs_driver solution
-  ![new_project](/image/new_project.png)
+1. Add a new project "Kernel Mode Driver, Empty (KMDF)" to the cs_driver solution
+   ![new_project](/image/new_project.png)
   
-- Add a source file to the new project
-  ![source_file](/image/source_file.png)
+2. Add a source file to the new project
 
-- Open a project properties of the cs_driver project and set Configuration to
-  "All Configurations" and Platform to "All Platforms"
+   ![source_file](/image/source_file.png)
+
+3. Open a project properties of the cs_driver project and set Configuration to
+   "All Configurations" and Platform to "All Platforms"
     - C/C++ > General > Additional Include Directories
       - $(SolutionDir)capstone\include
     - Linker > Input > Additional Dependencies 
       - $(OutDir)..\$(ConfigurationName)_WDK\capstone.lib;ntstrsafe.lib
-  ![properties](/image/properties.png)
+   ![properties](/image/properties.png)
 
-- Set dependency as below from [Project] > [Project Dependencies]
-  ![dependency](/image/dependency.png)
+4. Set dependency as below from [Project] > [Project Dependencies]
+   ![dependency](/image/dependency.png)
 
-- Include cs_driver.h from the source file. It can be done by referencing existing
-  one or creating a copy under the project
+5. Include cs_driver.h from the source file. It can be done by referencing existing
+   one or creating a copy under the project
 
-- In source code, call KeSaveFloatingPointState() before using any of Capstone APIs
-  on a 32bit system, and also call cs_driver_init() in order to setup dynamic 
-  memory management of Capstone. For more details, refer to comments in cs_driver.c
+6. In source code, call KeSaveFloatingPointState() before using any of Capstone APIs
+   on a 32bit system, and also call cs_driver_init() in order to setup dynamic 
+   memory management of Capstone. For more details, refer to comments in cs_driver.c
 
 After this, you are free to use Capstone API from a driver.
 
