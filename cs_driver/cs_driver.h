@@ -12,8 +12,8 @@
 
 // A structure to implement realloc()
 typedef struct _CS_DRIVER_MEMBLOCK {
-  size_t size;    // A number of bytes allocated
-  char data[1];   // An address returned to a caller
+  size_t size;  // A number of bytes allocated
+  char data[1]; // An address returned to a caller
 } CS_DRIVER_MEMBLOCK;
 C_ASSERT(sizeof(CS_DRIVER_MEMBLOCK) == sizeof(void *) * 2);
 

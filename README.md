@@ -39,43 +39,121 @@ in the kernel mode is properly functioning.
 
 How to use Capstone from your WDK project
 ------------------------------------------
-(TBD)
-
-- Create a new project
-- Delete all default .cpp and .h files
-- Ceate capstore as a submodule under the cs_driver folder
-
-    user@DESKTOP-LQSEFPE MINGW64 ~/Desktop/csd/cs_driver (master)
-    $ git submodule add https://github.com/tandasat/capstone.git
-
-- Add capstone_static.vcxproj located under the below folder to the solution 
-
-    C:\Users\user\Desktop\csd\cs_driver\capstone\msvc\capstone_static
-
-
-- Add cs_driver.c and cs_driver_test.cpp to the cs_driver project
-
-
-    C:\Users\user\Desktop\csd\cs_driver\cs_driver
-
-- Set dependency as below from [Project] > [Project Dependencies] 
-
-- Open a project properties of the cs_driver project and set Configuration to All Configurations and Platform to All Platforms.
+In general, what you need to embed Capstone to a driver is: capstone.lib 
+complied from the modified source code (contents of modification are explained 
+later), ntstrsafe.lib and cs_driver.h for compile and link, and some runtime 
+initialization and safe guard code explained in cs_driver.c. In order to make 
+use of Capstone from a new driver project, follow the below steps. 
+ 
+- Add a new project "Kernel Mode Driver, Empty (KMDF)" to the cs_driver solution
+- Add a source file to the new project 
+- Open a project properties of the cs_driver project and set Configuration to "All Configurations" and Platform to "All Platforms".
 
     C/C++ > General > Additional Include Directories
-    $(SolutionDir)capstone\include;
+    $(SolutionDir)capstone\include
 
     Linker > Input > Additional Dependencies 
-    $(OutDir)capstone.lib;ntstrsafe.lib;
-    
-    Wpp Tracing > General > Run Wpp Tracing
-    <inherit from parent or project defaults>
-    
+    $(OutDir)..\$(ConfigurationName)_WDK\capstone.lib;ntstrsafe.lib
 
+- Set dependency as below from [Project] > [Project Dependencies] 
+- Include cs_driver.h from the source file. It can be done by referencing existing one or creating a copy under the project.
 
+#include "../cs_driver/cs_driver.h"
+
+- In source code, call KeSaveFloatingPointState() before using any of Capstone APIs on a 32bit system, and also call cs_driver_init() in order to initialize a dynamic memory allocator of Capstone. For more details, refer to comments in cs_driver.c. 
+
+- After this, you are free to use Capstone API from a driver (do not forget call to Capstone API is encapsured with KeSaveFloatingPointState()/KeRestoreFloatingPointState() on 32bit systems).
+    
+Those steps are just an example and not hard-rule. You are also free to have a 
+separate solutions for Capstone and your driver as long as the driver can link
+capstone.lib and run equivalent code as what cs_driver.h provides.
+
+    
 How the cloned Capstone was modified for WDK projects
 ------------------------------------------------------
-(TBD)
+As of time cs_driver was created, source code of Capstone needs to be modified 
+in order to compile, link and run all tests as part of a driver successfully.
+This sections explains what changes were made and why as a reference. Beware 
+that you not need apply those changes when Capstone in this repositry is used. 
+
+- Added CAPSTONE_API to all Capstone APIs (760940f)
+This change is to specifie calling convention for Calstone APIs. 
+
+The defaut setting of calling convention is different between the capstone_static
+project and a WDK project. capstone_static compiles code with __cdecl calling 
+converntion, while a WDK project compiles code as __stdcall, leading to link 
+errors 
+
+- Replacesd snprintf() with cs_snprintf() (aba6117, 6bf747e, 760940f)
+This change is to avoid making use of snprintf(), which is not available for 
+drivers. 
+
+*This is a breaking change.* This change could cause a runtime issue when 
+user-defined vsnprintf() does not return the same value as what genuen 
+vsnprintf() does. In order to assess this impact, a developer is able to use
+cs_driver_vsnprintf_test() function to test if their vsnprintf() conforms 
+behaviour of that of the C/C++ standard.
+
+- Avoided compile errors with regard to string literals (6bf747e)
+This change is to avoid that strings comprise of PRI* macros is being threated
+as string literals and cause compile errors when compiled as C++11 and later.
+Details of this issue is explained under the "String literals followed by macros"
+section in the "Breaking Changes in Visual C++ 2015" page on MSDN.
+    - https://msdn.microsoft.com/en-us/library/bb531344.aspx#BK_compiler
+
+This change was made because cs_driver_test.cpp attemped to compile all test
+code as C++ code for ease of excersising all regression test. 
+
+
+- Added and made use of CS_OPT_NONE and CS_OPT_OFF (6bf747e, 760940f)
+This change is to avoid compile errors with regard to conversion errors from 
+integer to enum (cs_opt_type and cs_opt_value) when test_skipdata.c is compiled
+as C++ source as part of cs_driver_test.cpp.
+
+
+- Renamed a variable "i" to "ins" to avoid a warning (6bf747e)
+This change is to avoid compiler warning C4456 with regard to shadowed variables
+and required because warnings are treated as errors in a WDK project by default.
+
+
+- Added *_WDK configurations in the capstone_static project (8ae679e)
+This change is to add new build configurations for drivers. 
+
+First of all, the project file was upgraded for Visual Studio 2015. Then, *_WDK 
+configurations were made from existing configurations and following changes were
+made to the *_WDK configurations:
+
+ C/C++ > General > Debug Information Format
+ OLD: Program Database for Edit And Continue (/ZI)
+ NEW: Program Database (/Zi)
+ 
+ C/C++ > Preprocessor > Preprocessor Definitions
+ NEW: Deleted CAPSTONE_USE_SYS_DYN_MEM
+ 
+ C/C++ > Code Generation > Basic Runtime Checks
+ OLD: Both (/RTC1, equiv. to /RTCsu) (/RTC1)
+ NEW: Default
+ 
+ C/C++ > Code Generation > Runtime Library
+ OLD: Multi-threaded Debug (/MTd)
+ NEW: (empty)
+
+ C/C++ > All Options > Additional Options
+ OLD: (empty)
+ NEW: /kernel
+
+
+- Replaced stdint.h with myinttypes.h (f04254a)
+This change is to avoid compile errors due to make use of stdint.h, which is not 
+available for drivers. 
+
+- Added _KERNEL_MODE support (52959a1, 743bf536,)
+This change is to let myinttype.h and platform.h use the non-stanadard headers 
+(stdint.h and stdbool.h), which are not available for drivers.
+
+Note that _KERNEL_MODE is defined when a program is compiled with the /kernel 
+option as explained in the "/kernel (Create Kernel Mode Binary)" page on MSDN.
+    - https://msdn.microsoft.com/en-us/library/jj620896.aspx?f=255&MSPPError=-2147217396
 
 
 Caution
