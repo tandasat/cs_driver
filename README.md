@@ -48,18 +48,13 @@ use of Capstone from a new driver project, follow the below steps.
 - Add a new project "Kernel Mode Driver, Empty (KMDF)" to the cs_driver solution
 - Add a source file to the new project 
 - Open a project properties of the cs_driver project and set Configuration to "All Configurations" and Platform to "All Platforms".
-
-    C/C++ > General > Additional Include Directories
-    $(SolutionDir)capstone\include
-
-    Linker > Input > Additional Dependencies 
-    $(OutDir)..\$(ConfigurationName)_WDK\capstone.lib;ntstrsafe.lib
-
+    - C/C++ > General > Additional Include Directories
+      - $(SolutionDir)capstone\include
+    - Linker > Input > Additional Dependencies 
+      - $(OutDir)..\$(ConfigurationName)_WDK\capstone.lib;ntstrsafe.lib
+      
 - Set dependency as below from [Project] > [Project Dependencies] 
 - Include cs_driver.h from the source file. It can be done by referencing existing one or creating a copy under the project.
-
-#include "../cs_driver/cs_driver.h"
-
 - In source code, call KeSaveFloatingPointState() before using any of Capstone APIs on a 32bit system, and also call cs_driver_init() in order to initialize a dynamic memory allocator of Capstone. For more details, refer to comments in cs_driver.c. 
 
 - After this, you are free to use Capstone API from a driver (do not forget call to Capstone API is encapsured with KeSaveFloatingPointState()/KeRestoreFloatingPointState() on 32bit systems).
@@ -76,7 +71,9 @@ in order to compile, link and run all tests as part of a driver successfully.
 This sections explains what changes were made and why as a reference. Beware 
 that you not need apply those changes when Capstone in this repositry is used. 
 
+
 - Added CAPSTONE_API to all Capstone APIs (760940f)
+
 This change is to specifie calling convention for Calstone APIs. 
 
 The defaut setting of calling convention is different between the capstone_static
@@ -84,7 +81,9 @@ project and a WDK project. capstone_static compiles code with __cdecl calling
 converntion, while a WDK project compiles code as __stdcall, leading to link 
 errors 
 
+
 - Replacesd snprintf() with cs_snprintf() (aba6117, 6bf747e, 760940f)
+
 This change is to avoid making use of snprintf(), which is not available for 
 drivers. 
 
@@ -94,7 +93,9 @@ vsnprintf() does. In order to assess this impact, a developer is able to use
 cs_driver_vsnprintf_test() function to test if their vsnprintf() conforms 
 behaviour of that of the C/C++ standard.
 
+
 - Avoided compile errors with regard to string literals (6bf747e)
+
 This change is to avoid that strings comprise of PRI* macros is being threated
 as string literals and cause compile errors when compiled as C++11 and later.
 Details of this issue is explained under the "String literals followed by macros"
@@ -106,48 +107,48 @@ code as C++ code for ease of excersising all regression test.
 
 
 - Added and made use of CS_OPT_NONE and CS_OPT_OFF (6bf747e, 760940f)
+
 This change is to avoid compile errors with regard to conversion errors from 
 integer to enum (cs_opt_type and cs_opt_value) when test_skipdata.c is compiled
 as C++ source as part of cs_driver_test.cpp.
 
 
 - Renamed a variable "i" to "ins" to avoid a warning (6bf747e)
+
 This change is to avoid compiler warning C4456 with regard to shadowed variables
 and required because warnings are treated as errors in a WDK project by default.
 
 
 - Added *_WDK configurations in the capstone_static project (8ae679e)
+
 This change is to add new build configurations for drivers. 
 
 First of all, the project file was upgraded for Visual Studio 2015. Then, *_WDK 
 configurations were made from existing configurations and following changes were
 made to the *_WDK configurations:
-
- C/C++ > General > Debug Information Format
- OLD: Program Database for Edit And Continue (/ZI)
- NEW: Program Database (/Zi)
- 
- C/C++ > Preprocessor > Preprocessor Definitions
- NEW: Deleted CAPSTONE_USE_SYS_DYN_MEM
- 
- C/C++ > Code Generation > Basic Runtime Checks
- OLD: Both (/RTC1, equiv. to /RTCsu) (/RTC1)
- NEW: Default
- 
- C/C++ > Code Generation > Runtime Library
- OLD: Multi-threaded Debug (/MTd)
- NEW: (empty)
-
- C/C++ > All Options > Additional Options
- OLD: (empty)
- NEW: /kernel
+ - C/C++ > General > Debug Information Format
+   - OLD: Program Database for Edit And Continue (/ZI)
+   - NEW: Program Database (/Zi)
+ - C/C++ > Preprocessor > Preprocessor Definitions
+   - NEW: Deleted CAPSTONE_USE_SYS_DYN_MEM
+ - C/C++ > Code Generation > Basic Runtime Checks
+   - OLD: Both (/RTC1, equiv. to /RTCsu) (/RTC1)
+   - NEW: Default
+ - C/C++ > Code Generation > Runtime Library
+   - OLD: Multi-threaded Debug (/MTd)
+   - NEW: (empty)
+ - C/C++ > All Options > Additional Options
+   - OLD: (empty)
+   - NEW: /kernel
 
 
 - Replaced stdint.h with myinttypes.h (f04254a)
+
 This change is to avoid compile errors due to make use of stdint.h, which is not 
 available for drivers. 
 
-- Added _KERNEL_MODE support (52959a1, 743bf536,)
+- Added _KERNEL_MODE support (52959a1, 743bf536)
+
 This change is to let myinttype.h and platform.h use the non-stanadard headers 
 (stdint.h and stdbool.h), which are not available for drivers.
 
