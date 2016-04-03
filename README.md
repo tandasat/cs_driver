@@ -41,15 +41,22 @@ initialization and safe guard code explained in cs_driver.c. In order to make
 use of Capstone from a new driver project, follow the below steps. 
  
 - Add a new project "Kernel Mode Driver, Empty (KMDF)" to the cs_driver solution
+  ![new_project](/image/new_project.png)
+  
 - Add a source file to the new project
+  ![source_file](/image/source_file.png)
+
 - Open a project properties of the cs_driver project and set Configuration to
   "All Configurations" and Platform to "All Platforms"
     - C/C++ > General > Additional Include Directories
       - $(SolutionDir)capstone\include
     - Linker > Input > Additional Dependencies 
       - $(OutDir)..\$(ConfigurationName)_WDK\capstone.lib;ntstrsafe.lib
+  ![properties](/image/properties.png)
 
 - Set dependency as below from [Project] > [Project Dependencies]
+  ![dependency](/image/dependency.png)
+
 - Include cs_driver.h from the source file. It can be done by referencing existing
   one or creating a copy under the project
 
@@ -70,8 +77,8 @@ in order to compile, link and run all tests as part of a driver successfully.
 This sections explains what changes were made and why as a reference. Beware 
 that you not need apply those changes when Capstone in this repositry is used. 
 
-
-- Added CAPSTONE_API to all Capstone APIs tandasat/capstone@760940fdceb50a09f1a8ebee5dc807b6039f144e
+#### Added CAPSTONE_API to all Capstone APIs
+- https://github.com/tandasat/capstone/commit/760940fdceb50a09f1a8ebee5dc807b6039f144e
 
 This change is to specifie calling convention for Calstone APIs. 
 
@@ -80,45 +87,48 @@ project and a WDK project. capstone_static compiles code with __cdecl calling
 converntion, while a WDK project compiles code as __stdcall, leading to link 
 errors 
 
-
-- Replacesd snprintf() with cs_snprintf() (aba6117, 6bf747e, 760940f)
+#### Replacesd snprintf() with cs_snprintf()
+- https://github.com/tandasat/capstone/commit/aba6117c6c6723dc446797d2b889f4b989cd512a
+- https://github.com/tandasat/capstone/commit/6bf747e5a59a0f785117198cc04c93391decae43
+- https://github.com/tandasat/capstone/commit/760940fdceb50a09f1a8ebee5dc807b6039f144e
 
 This change is to avoid making use of snprintf(), which is not available for 
 drivers. 
 
-**This change could cause a runtime issue when user-defined vsnprintf() does
+**This change could lead to a runtime issue when user-defined vsnprintf() does
 not return the same value as what genuen vsnprintf() does.** In order to 
 assess this impact, a developer is able to use the cs_driver_vsnprintf_test() 
 function to test if their vsnprintf() conforms behaviour of that of the C/C++ 
 standard.
 
-
-- Avoided compile errors with regard to string literals (6bf747e)
+#### Avoided compile errors with regard to string literals
+- https://github.com/tandasat/capstone/commit/6bf747e5a59a0f785117198cc04c93391decae43
 
 This change is to avoid that strings comprise of PRI* macros is being threated
 as string literals and cause compile errors when compiled as C++11 and later.
 Details of this issue is explained under the "String literals followed by macros"
 section in the "Breaking Changes in Visual C++ 2015" page on MSDN.
-    - https://msdn.microsoft.com/en-us/library/bb531344.aspx#BK_compiler
+- https://msdn.microsoft.com/en-us/library/bb531344.aspx#BK_compiler
 
 This change was made because cs_driver_test.cpp attemped to compile all test
 code as C++ code for ease of excersising all regression test. 
 
-
-- Added and made use of CS_OPT_NONE and CS_OPT_OFF (6bf747e, 760940f)
+#### Added and made use of CS_OPT_NONE and CS_OPT_OFF 
+- https://github.com/tandasat/capstone/commit/6bf747e5a59a0f785117198cc04c93391decae43
+- https://github.com/tandasat/capstone/commit/760940fdceb50a09f1a8ebee5dc807b6039f144e
 
 This change is to avoid compile errors with regard to conversion errors from 
 integer to enum (cs_opt_type and cs_opt_value) when test_skipdata.c is compiled
 as C++ source as part of cs_driver_test.cpp.
 
-
-- Renamed a variable "i" to "ins" to avoid a warning (6bf747e)
+#### Renamed a variable "i" to "ins" to avoid a warning
+- https://github.com/tandasat/capstone/commit/6bf747e5a59a0f785117198cc04c93391decae43
 
 This change is to avoid compiler warning C4456 with regard to shadowed variables
 and required because warnings are treated as errors in a WDK project by default.
 
-
-- Added *_WDK configurations in the capstone_static project (8ae679e)
+#### Added *_WDK configurations in the capstone_static project
+- https://github.com/tandasat/capstone/commit/8ae679e0dee211a7ea0cbebb50a978e63414877a
 
 This change is to add new build configurations for drivers. 
 
@@ -140,20 +150,22 @@ made to the *_WDK configurations:
    - OLD: (empty)
    - NEW: /kernel
 
-
-- Replaced stdint.h with myinttypes.h (f04254a)
+#### Replaced stdint.h with myinttypes.h
+- https://github.com/tandasat/capstone/commit/f04254a87c5fed7abddc3aa607ec8bc7f67bfc6a
 
 This change is to avoid compile errors due to make use of stdint.h, which is not 
 available for drivers. 
 
-- Added _KERNEL_MODE support (52959a1, 743bf536)
+#### Added _KERNEL_MODE support
+- https://github.com/tandasat/capstone/commit/52959a1bb8eca4d9162396cb4ea3cdfbf31a2b98
+- https://github.com/tandasat/capstone/commit/743bf536e0c14b4934c7d92cd5c749eef1baf258
 
 This change is to let myinttype.h and platform.h use the non-stanadard headers 
 (stdint.h and stdbool.h), which are not available for drivers.
 
 Note that _KERNEL_MODE is defined when a program is compiled with the /kernel 
 option as explained in the "/kernel (Create Kernel Mode Binary)" page on MSDN.
-    - https://msdn.microsoft.com/en-us/library/jj620896.aspx?f=255&MSPPError=-2147217396
+- https://msdn.microsoft.com/en-us/library/jj620896.aspx?f=255&MSPPError=-2147217396
 
 
 ## Caution
@@ -167,11 +179,9 @@ explained in this page should not be applied to production code until a
 cause and a scope of this issue are identified. 
 
 
-Supported Platforms
---------------------
+## Supported Platforms
 - x86 and x64 Windows 7, 8.1 and 10
 
 
-License
---------
+## License
 This software is released under the MIT License, see LICENSE.
