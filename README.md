@@ -1,6 +1,4 @@
-cs_driver
-==========
-
+# cs_driver
 cs_driver is a sample project for using Capstone in a driver with Visual Studio 
 2015. This project aims to provide a minimal, clean procedure to compile and link
 the Capstone disassembly framework in your Windows driver project. For more 
@@ -8,17 +6,15 @@ information about Capstone, see its project page.
 - http://www.capstone-engine.org/
 
 
-Sample Output
----------------
+## Sample Output
 ![sample](/image/sample.png)
 
 
-Motivation
------------
+## Motivation
 Capstone is a reliable, supported disassemler developed by an active community. 
-It is designed for multi-platform support for in first place, and supports 
-usage by OS kernel code. In fact, one of Capstone documents refers to a sample
-project for learning how to embed Capstone into an Windows kernel driver.
+It is designed for multi-platform support in first place, and supports usage by
+OS kernel code. In fact, one of Capstone documents refers to a sample project
+for learning how to embed Capstone into an Windows kernel driver.
 - https://github.com/aquynh/KernelProject
 
 However, this project lacks information about how to actually configure your 
@@ -30,49 +26,52 @@ drivers while those libraries are neither relevant to Capstone nor always
 demanded. For those reasons, the sample project is not overly helpful for those
 who want to learn how to use Capstone in Windows drivers.
 
-cs_driver, on the other hand, explains how to configure yours and Capstone project
+cs_driver, on the other hand, explains how to configure your and Capstone project
 and includes only minimum amout of code with detailed comments for learning a 
 procedure to apply Capstone to your project quickly. Also, cs_driver is able to
 run all existing Capstone test code so that a developer can confirm that Capstone
-in the kernel mode is properly functioning.
+on the kernel mode is properly functioning.
 
 
-How to use Capstone from your WDK project
-------------------------------------------
-In general, what you need to embed Capstone to a driver is: capstone.lib 
+## How to use Capstone from your WDK project
+In general, what you need to embed Capstone to a driver are: capstone.lib 
 complied from the modified source code (contents of modification are explained 
-later), ntstrsafe.lib and cs_driver.h for compile and link, and some runtime 
+later), ntstrsafe.lib to resolve __fltused, and cs_driver.h and some runtime 
 initialization and safe guard code explained in cs_driver.c. In order to make 
 use of Capstone from a new driver project, follow the below steps. 
  
 - Add a new project "Kernel Mode Driver, Empty (KMDF)" to the cs_driver solution
-- Add a source file to the new project 
-- Open a project properties of the cs_driver project and set Configuration to "All Configurations" and Platform to "All Platforms".
+- Add a source file to the new project
+- Open a project properties of the cs_driver project and set Configuration to
+  "All Configurations" and Platform to "All Platforms"
     - C/C++ > General > Additional Include Directories
       - $(SolutionDir)capstone\include
     - Linker > Input > Additional Dependencies 
       - $(OutDir)..\$(ConfigurationName)_WDK\capstone.lib;ntstrsafe.lib
-      
-- Set dependency as below from [Project] > [Project Dependencies] 
-- Include cs_driver.h from the source file. It can be done by referencing existing one or creating a copy under the project.
-- In source code, call KeSaveFloatingPointState() before using any of Capstone APIs on a 32bit system, and also call cs_driver_init() in order to initialize a dynamic memory allocator of Capstone. For more details, refer to comments in cs_driver.c. 
 
-- After this, you are free to use Capstone API from a driver (do not forget call to Capstone API is encapsured with KeSaveFloatingPointState()/KeRestoreFloatingPointState() on 32bit systems).
-    
-Those steps are just an example and not hard-rule. You are also free to have a 
-separate solutions for Capstone and your driver as long as the driver can link
-capstone.lib and run equivalent code as what cs_driver.h provides.
+- Set dependency as below from [Project] > [Project Dependencies]
+- Include cs_driver.h from the source file. It can be done by referencing existing
+  one or creating a copy under the project
+
+- In source code, call KeSaveFloatingPointState() before using any of Capstone APIs
+  on a 32bit system, and also call cs_driver_init() in order to setup dynamic 
+  memory management of Capstone. For more details, refer to comments in cs_driver.c
+
+After this, you are free to use Capstone API from a driver.
+
+Those steps are just example and not a hard-rule. Developpers are also free to 
+have aseparate solutions for Capstone and your driver as long as the driver can
+link capstone.lib and run equivalent code to what cs_driver.h provides.
 
     
-How the cloned Capstone was modified for WDK projects
-------------------------------------------------------
+## How the cloned Capstone was modified for WDK projects
 As of time cs_driver was created, source code of Capstone needs to be modified 
 in order to compile, link and run all tests as part of a driver successfully.
 This sections explains what changes were made and why as a reference. Beware 
 that you not need apply those changes when Capstone in this repositry is used. 
 
 
-- Added CAPSTONE_API to all Capstone APIs (760940f)
+- Added CAPSTONE_API to all Capstone APIs tandasat/capstone@760940fdceb50a09f1a8ebee5dc807b6039f144e
 
 This change is to specifie calling convention for Calstone APIs. 
 
@@ -87,11 +86,11 @@ errors
 This change is to avoid making use of snprintf(), which is not available for 
 drivers. 
 
-*This is a breaking change.* This change could cause a runtime issue when 
-user-defined vsnprintf() does not return the same value as what genuen 
-vsnprintf() does. In order to assess this impact, a developer is able to use
-cs_driver_vsnprintf_test() function to test if their vsnprintf() conforms 
-behaviour of that of the C/C++ standard.
+**This change could cause a runtime issue when user-defined vsnprintf() does
+not return the same value as what genuen vsnprintf() does.** In order to 
+assess this impact, a developer is able to use the cs_driver_vsnprintf_test() 
+function to test if their vsnprintf() conforms behaviour of that of the C/C++ 
+standard.
 
 
 - Avoided compile errors with regard to string literals (6bf747e)
@@ -157,9 +156,8 @@ option as explained in the "/kernel (Create Kernel Mode Binary)" page on MSDN.
     - https://msdn.microsoft.com/en-us/library/jj620896.aspx?f=255&MSPPError=-2147217396
 
 
-Caution
---------
-*Do not apply this procedure to your production project.* 
+## Caution
+**Do not apply this procedure to your production project.* *
 
 Currently, one of the skipdata tests called "Arm - Skip data with callback" 
 causes a bug check on 32bit systems. While a reason is unknown and being 
