@@ -1,5 +1,5 @@
 # cs_driver
-cs_driver is a sample project for using Capstone in a driver with Visual Studio 
+cs_driver is a sample project for using Capstone from a driver in Visual Studio 
 2015. This project aims to provide a minimal, clean procedure to compile and link
 the Capstone disassembly framework in your Windows driver project. For more 
 information about Capstone, see its project page.
