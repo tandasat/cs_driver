@@ -59,17 +59,18 @@ static NTSTATUS cs_driver_hello() {
     goto exit;
   }
 
-  if (cs_open(CS_ARCH_X86, CS_MODE_64, &handle) != CS_ERR_OK) {
+  if (cs_open(CS_ARCH_X86, (sizeof(void *) == 4) ? CS_MODE_32 : CS_MODE_64,
+              &handle) != CS_ERR_OK) {
     goto exit;
   }
 
   count = cs_disasm(handle, (uint8_t *)&cs_driver_hello, 0x100,
                     (uint64_t)&cs_driver_hello, 0, &insn);
   if (count > 0) {
-    printf("cs_driver!DriverEntry:\n");
+    printf("cs_driver!cs_driver_hello:\n");
     for (size_t j = 0; j < count; j++) {
-      printf("0x%llx:\t%s\t\t%s\n", insn[j].address, insn[j].mnemonic,
-             insn[j].op_str);
+      printf("0x%p\t%s\t\t%s\n", (void *)(uintptr_t)insn[j].address,
+             insn[j].mnemonic, insn[j].op_str);
     }
     cs_free(insn, count);
   }

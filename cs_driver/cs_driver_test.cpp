@@ -74,7 +74,7 @@ EXTERN_C void cs_driver_regression_test() {
   iter::test();
   mips::test();
   ppc::test();
-  skipdata::test();    // FIXME: a bug check; likely to be buffer overflow
+  skipdata::test();
   sparc::test();
   systemz::test();
   x86::test();
