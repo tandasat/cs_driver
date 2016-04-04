@@ -170,17 +170,6 @@ option as explained in the "/kernel (Create Kernel Mode Binary)" page on MSDN.
 - https://msdn.microsoft.com/en-us/library/jj620896.aspx?f=255&MSPPError=-2147217396
 
 
-## Caution
-**Do not apply this procedure to your production project.**
-
-Currently, one of the skipdata tests called "Arm - Skip data with callback" 
-causes a bug check on 32bit systems. While a reason is unknown and being 
-investigated, it seems to be a buffer overflow issue. While I have not seen 
-any problems by using x86_64 related features from a driver, the procedure 
-explained in this page should not be applied to production code until a 
-cause and a scope of this issue are identified. 
-
-
 ## Supported Platforms
 - x86 and x64 Windows 7, 8.1 and 10
 
