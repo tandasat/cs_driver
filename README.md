@@ -37,17 +37,22 @@ on the kernel mode is properly functioning.
 In general, what you need to embed Capstone to a driver are: capstone.lib 
 complied from the modified source code (contents of modification are explained 
 later), ntstrsafe.lib to resolve __fltused, and cs_driver.h and some runtime 
-initialization and safe guard code explained in cs_driver.c. In order to make 
-use of Capstone from a new driver project, follow the below steps. 
- 
-1. Add a new project "Kernel Mode Driver, Empty (KMDF)" to the cs_driver solution
+initialization and safe guard code explained in cs_driver.c. 
+
+In order to make use of Capstone from a new driver project, follow the below steps. 
+
+1. Check out the cs_driver repository and open cs_driver.sln.
+   
+    $ git clone --recursive https://github.com/tandasat/cs_driver.git
+
+2. Add a new project "Kernel Mode Driver, Empty (KMDF)" to the cs_driver solution
    ![new_project](/image/new_project.png)
   
-2. Add a source file to the new project
+3. Add a source file to the new project
 
    ![source_file](/image/source_file.png)
 
-3. Open a project properties of the cs_driver project and set Configuration to
+4. Open a project properties of the cs_driver project and set Configuration to
    "All Configurations" and Platform to "All Platforms"
     - C/C++ > General > Additional Include Directories
       - $(SolutionDir)capstone\include
@@ -55,13 +60,13 @@ use of Capstone from a new driver project, follow the below steps.
       - $(OutDir)..\$(ConfigurationName)_WDK\capstone.lib;ntstrsafe.lib
    ![properties](/image/properties.png)
 
-4. Set dependency as below from [Project] > [Project Dependencies]
+5. Set dependency as below from [Project] > [Project Dependencies]
    ![dependency](/image/dependency.png)
 
-5. Include cs_driver.h from the source file. It can be done by referencing existing
+6. Include cs_driver.h from the source file. It can be done by referencing existing
    one or creating a copy under the project
 
-6. In source code, call KeSaveFloatingPointState() before using any of Capstone APIs
+7. In source code, call KeSaveFloatingPointState() before using any of Capstone APIs
    on a 32bit system, and also call cs_driver_init() in order to setup dynamic 
    memory management of Capstone. For more details, refer to comments in cs_driver.c
 
@@ -162,8 +167,9 @@ available for drivers.
 - https://github.com/tandasat/capstone/commit/52959a1bb8eca4d9162396cb4ea3cdfbf31a2b98
 - https://github.com/tandasat/capstone/commit/743bf536e0c14b4934c7d92cd5c749eef1baf258
 
-This change is to let myinttype.h and platform.h use the non-stanadard headers 
-(stdint.h and stdbool.h), which are not available for drivers.
+This change is to let myinttype.h and platform.h use the non-stanadard 
+definitions instead of the standard headers (stdint.h and stdbool.h), which are 
+not available for drivers.
 
 Note that _KERNEL_MODE is defined when a program is compiled with the /kernel 
 option as explained in the "/kernel (Create Kernel Mode Binary)" page on MSDN.
