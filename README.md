@@ -80,13 +80,14 @@ that you not need apply those changes when Capstone in this repository is used.
 
 #### Added CAPSTONE_API to all Capstone APIs
 - https://github.com/tandasat/capstone/commit/760940fdceb50a09f1a8ebee5dc807b6039f144e
+- https://github.com/tandasat/capstone/commit/6dad56669b1e2fb2f09484adfb5c494285204d18
 
 This change is to specifie calling convention for Calstone APIs. 
 
 The default setting of calling convention is different between the capstone_static
 project and a WDK project. capstone_static compiles code with __cdecl calling 
-converntion, while a WDK project compiles code as __stdcall, leading to link 
-errors 
+converntion, while a WDK project compiles code as __stdcall, leading to link or
+runtime errors 
 
 #### Replacesd snprintf() with cs_snprintf()
 - https://github.com/tandasat/capstone/commit/aba6117c6c6723dc446797d2b889f4b989cd512a
