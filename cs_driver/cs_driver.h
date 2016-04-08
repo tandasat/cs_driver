@@ -6,14 +6,12 @@
 #include <ntddk.h>
 
 // A pool tag for memory allocation
-#ifndef CS_DRIVER_POOL_TAG
-#define CS_DRIVER_POOL_TAG 'rdsC'
-#endif
+static const ULONG CS_DRIVER_POOL_TAG = 'rdsC';
 
 // A structure to implement realloc()
 typedef struct _CS_DRIVER_MEMBLOCK {
-  size_t size;  // A number of bytes allocated
-  char data[1]; // An address returned to a caller
+  size_t size;   // A number of bytes allocated
+  char data[1];  // An address returned to a caller
 } CS_DRIVER_MEMBLOCK;
 C_ASSERT(sizeof(CS_DRIVER_MEMBLOCK) == sizeof(void *) * 2);
 
@@ -49,7 +47,7 @@ inline void *__cdecl csdrv_calloc(size_t n, size_t size) {
     return NULL;
   }
 
-  return memset(new_ptr, 0, total);
+  return RtlFillMemory(new_ptr, total, 0);
 }
 
 // realloc()
@@ -69,7 +67,7 @@ inline void *__cdecl csdrv_realloc(void *ptr, size_t size) {
 
   current_size = CONTAINING_RECORD(ptr, CS_DRIVER_MEMBLOCK, data)->size;
   smaller_size = (current_size < size) ? current_size : size;
-  memcpy(new_ptr, ptr, smaller_size);
+  RtlCopyMemory(new_ptr, ptr, smaller_size);
   csdrv_free(ptr);
   return new_ptr;
 }
@@ -77,6 +75,10 @@ inline void *__cdecl csdrv_realloc(void *ptr, size_t size) {
 // vsnprintf(). _vsnprintf() is avaialable for drivers, but it differs from
 // vsnprintf() in a return value and when a null-terminater is set.
 // csdrv_vsnprintf() takes care of those differences.
+#pragma warning(push)
+#pragma warning(disable : 28719)  // Banned API Usage : _vsnprintf is a Banned
+                                  // API as listed in dontuse.h for security
+                                  // purposes.
 inline int __cdecl csdrv_vsnprintf(char *buffer, size_t count,
                                    const char *format, va_list argptr) {
   int result = _vsnprintf(buffer, count, format, argptr);
@@ -100,6 +102,7 @@ inline int __cdecl csdrv_vsnprintf(char *buffer, size_t count,
 
   return result;
 }
+#pragma warning(pop)
 
 // Initializes a dynamic memory allocator for Capstone. Returns what cs_option()
 // returns.
@@ -113,4 +116,4 @@ inline cs_err cs_driver_init() {
   return cs_option(0, CS_OPT_MEM, (size_t)&setup);
 }
 
-#endif // CS_DRIVER_CS_DRIVER_H_
+#endif  // CS_DRIVER_CS_DRIVER_H_
