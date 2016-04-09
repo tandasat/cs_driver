@@ -35,12 +35,19 @@ static NTSTATUS cs_driver_hello() {
   cs_insn *insn;
   size_t count;
   KFLOATING_SAVE float_save;
-  NTSTATUS status;
+  NTSTATUS status = STATUS_UNSUCCESSFUL;
 
   // Any of Capstone APIs cannot be called at IRQL higher than DISPATCH_LEVEL
   // since our malloc implementation using ExAllocatePoolWithTag() is able to
   // allocate memory only up to the DISPATCH_LEVEL level.
   NT_ASSERT(KeGetCurrentIrql() <= DISPATCH_LEVEL);
+
+  // Setup our own dynamic memory functions with cs_driver_init().
+  if (cs_driver_init() != CS_ERR_OK) {
+    // Failed to initialize our user-defined dynamic mem functions.
+    // Quit is the only choice here :-(
+    goto exit;
+  }
 
   // On a 32bit driver, KeSaveFloatingPointState() is required before using any
   // Capstone function because they can access to the MMX/x87 registers and
@@ -50,13 +57,6 @@ static NTSTATUS cs_driver_hello() {
   status = KeSaveFloatingPointState(&float_save);
   if (!NT_SUCCESS(status)) {
     return status;
-  }
-
-  // Setup our own dynamic memory functions with cs_driver_init().
-  if (cs_driver_init() != CS_ERR_OK) {
-    // Failed to initialize our user-defined dynamic mem functions.
-    // Quit is the only choice here :-(
-    goto exit;
   }
 
   if (cs_open(CS_ARCH_X86, (sizeof(void *) == 4) ? CS_MODE_32 : CS_MODE_64,

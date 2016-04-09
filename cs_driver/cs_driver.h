@@ -104,16 +104,37 @@ inline int __cdecl csdrv_vsnprintf(char *buffer, size_t count,
 }
 #pragma warning(pop)
 
-// Initializes a dynamic memory allocator for Capstone. Returns what cs_option()
-// returns.
+/*
+ Initializes Capstone dynamic memory management for Windows drivers
+
+ @return: CS_ERR_OK on success, or other value on failure.
+ Refer to cs_err enum for detailed error.
+
+ NOTE: cs_driver_init() can be called at IRQL <= DISPATCH_LEVEL.
+*/
 inline cs_err cs_driver_init() {
+  KFLOATING_SAVE float_save;
+  NTSTATUS status;
   cs_opt_mem setup;
+  cs_err err;
+
+  NT_ASSERT(KeGetCurrentIrql() <= DISPATCH_LEVEL);
+
+  // Capstone API may use floating point.
+  status = KeSaveFloatingPointState(&float_save);
+  if (!NT_SUCCESS(status)) {
+    return CS_ERR_MEM;
+  }
+
   setup.malloc = csdrv_malloc;
   setup.calloc = csdrv_calloc;
   setup.realloc = csdrv_realloc;
   setup.free = csdrv_free;
   setup.vsnprintf = csdrv_vsnprintf;
-  return cs_option(0, CS_OPT_MEM, (size_t)&setup);
+  err = cs_option(0, CS_OPT_MEM, (size_t)&setup);
+
+  KeRestoreFloatingPointState(&float_save);
+  return err;
 }
 
 #endif  // CS_DRIVER_CS_DRIVER_H_
