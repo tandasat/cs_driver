@@ -123,7 +123,7 @@ Refer to cs_err enum for detailed error.
 
 NOTE: cs_driver_init() can be called at IRQL <= DISPATCH_LEVEL.
 */
-cs_err CAPSTONE_API cs_driver_init()
+cs_err CAPSTONE_API cs_driver_mm_init()
 {
   KFLOATING_SAVE float_save;
   NTSTATUS status;

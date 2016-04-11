@@ -46,7 +46,7 @@ static NTSTATUS cs_driver_hello() {
   NT_ASSERT(KeGetCurrentIrql() <= DISPATCH_LEVEL);
 
   // Setup our own dynamic memory functions with cs_driver_init().
-  if (cs_driver_init() != CS_ERR_OK) {
+  if (cs_driver_mm_init() != CS_ERR_OK) {
     // Failed to initialize our user-defined dynamic mem functions.
     // Quit is the only choice here :-(
     return STATUS_UNSUCCESSFUL;

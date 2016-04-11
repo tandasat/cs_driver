@@ -30,9 +30,12 @@
     <ClCompile Include="cs_driver_test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="driver_mm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cs_driver.h">
+    <ClInclude Include="driver_mm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

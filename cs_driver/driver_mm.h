@@ -11,6 +11,6 @@
 
  NOTE: cs_driver_init() can be called at IRQL <= DISPATCH_LEVEL.
 */
-cs_err CAPSTONE_API cs_driver_init();
+cs_err CAPSTONE_API cs_driver_mm_init();
 
 #endif  // CAPSTONE_DRIVER_MM_H_
