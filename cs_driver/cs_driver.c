@@ -1,14 +1,17 @@
-#include "cs_driver.h"
+#include <ntddk.h>
+#include "driver_mm.h"
 
 // 'conversion' : from function pointer 'type1' to data pointer 'type2'
 #pragma warning(disable : 4054)
 
 EXTERN_C int cs_snprintf(char *buffer, size_t size, const char *fmt, ...);
 EXTERN_C void cs_driver_regression_test();
+
+DRIVER_INITIALIZE DriverEntry;
 static void cs_driver_tests();
 static NTSTATUS cs_driver_hello();
 static void cs_driver_vsnprintf_test();
-int __cdecl printf(const char *format, ...);
+
 
 // Driver entry point
 EXTERN_C NTSTATUS DriverEntry(PDRIVER_OBJECT DriverObject,
@@ -46,11 +49,11 @@ static NTSTATUS cs_driver_hello() {
   if (cs_driver_init() != CS_ERR_OK) {
     // Failed to initialize our user-defined dynamic mem functions.
     // Quit is the only choice here :-(
-    goto exit;
+    return STATUS_UNSUCCESSFUL;
   }
 
   // On a 32bit driver, KeSaveFloatingPointState() is required before using any
-  // Capstone function because they can access to the MMX/x87 registers and
+  // Capstone function because Capstone can access to the MMX/x87 registers and
   // 32bit Windows requires drivers to use KeSaveFloatingPointState() before and
   // KeRestoreFloatingPointState() after accesing to them. See "Using Floating
   // Point or MMX in a WDM Driver" on MSDN for more details.
@@ -105,12 +108,12 @@ static void cs_driver_vsnprintf_test() {
 // printf() is required to exercise regression test etc. It can be omitted if
 // those are not used in the project. This functions mimics printf() but does
 // not return the same value as printf() would do.
-int __cdecl printf(const char *format, ...) {
+_Use_decl_annotations_ int __cdecl printf(const char *_Format, ...) {
   NTSTATUS status;
   va_list args;
 
-  va_start(args, format);
-  status = vDbgPrintEx(DPFLTR_DEFAULT_ID, DPFLTR_ERROR_LEVEL, format, args);
+  va_start(args, _Format);
+  status = vDbgPrintEx(DPFLTR_DEFAULT_ID, DPFLTR_ERROR_LEVEL, _Format, args);
   va_end(args);
   return NT_SUCCESS(status);
 }
