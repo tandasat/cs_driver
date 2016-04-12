@@ -63,12 +63,14 @@ In order to make use of Capstone from a new driver project, follow the below ste
 5. Set dependency as below from [Project] > [Project Dependencies]
    ![dependency](/image/dependency.png)
 
-6. Include cs_driver.h from the source file. It can be done by referencing existing
-   one or creating a copy under the project
+6. Add driver_mm.h and driver_mm.c to the project and include the header from
+   the source file. It can be done by referencing existing one or creating a
+   copy under the project
 
-7. In source code, call KeSaveFloatingPointState() before using any of Capstone APIs
-   on a 32bit system, and also call cs_driver_init() in order to setup dynamic 
-   memory management of Capstone. For more details, refer to comments in cs_driver.c
+7. In source code, call cs_driver_mm_init() in order to setup dynamic memory
+   management of Capstone first. Also, do not forget to call 
+   KeSaveFloatingPointState() before using any of Capstone APIs on a 32bit
+   system. For more details, refer to comments in cs_driver.c
 
 After this, you are free to use Capstone API from a driver.
 
@@ -78,6 +80,8 @@ link capstone.lib and run equivalent code to what cs_driver.h provides.
 
     
 ## How the cloned Capstone was modified for WDK projects
+**EDIT: Those changes are begin merged into Capstone.**
+
 As of time cs_driver was created, source code of Capstone needs to be modified 
 in order to compile, link and run all tests as part of a driver successfully.
 This sections explains what changes were made and why as a reference. Beware 
