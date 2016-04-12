@@ -63,9 +63,9 @@ In order to make use of Capstone from a new driver project, follow the below ste
 5. Set dependency as below from [Project] > [Project Dependencies]
    ![dependency](/image/dependency.png)
 
-6. Add driver_mm.h and driver_mm.c to the project and include the header from
-   the source file. It can be done by referencing existing one or creating a
-   copy under the project
+6. Add cs_driver_mm.h and cs_driver_mm.c to the project and include the header
+   from the source file. It can be done by referencing existing one or creating
+   a copy under the project
 
 7. In source code, call cs_driver_mm_init() in order to setup dynamic memory
    management of Capstone first. Also, do not forget to call 
