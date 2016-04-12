@@ -133,10 +133,10 @@
   <ItemGroup>
     <ClCompile Include="cs_driver.c" />
     <ClCompile Include="cs_driver_test.cpp" />
-    <ClCompile Include="driver_mm.c" />
+    <ClCompile Include="cs_driver_mm.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="driver_mm.h" />
+    <ClInclude Include="cs_driver_mm.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
